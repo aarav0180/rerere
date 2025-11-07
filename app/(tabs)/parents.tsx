@@ -251,25 +251,33 @@ export default function ParentsScreen() {
                         <!DOCTYPE html>
                         <html>
                         <head>
-                          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
                           <style>
+                            * { 
+                              margin: 0; 
+                              padding: 0; 
+                              box-sizing: border-box;
+                            }
                             body { 
                               margin: 0; 
                               padding: 0; 
                               background: #000; 
-                              display: flex; 
-                              justify-content: center; 
-                              align-items: center; 
-                              min-height: 100vh;
+                              overflow: hidden;
                             }
                             .video-container { 
                               position: relative; 
                               width: 100%; 
-                              height: 0; 
-                              padding-bottom: 56.25%; 
-                              overflow: hidden;
+                              height: 100vh;
+                              display: flex;
+                              align-items: center;
+                              justify-content: center;
                             }
-                            .video-container iframe { 
+                            .video-wrapper {
+                              position: relative;
+                              width: 100%;
+                              padding-bottom: 56.25%;
+                            }
+                            .video-wrapper iframe { 
                               position: absolute; 
                               top: 0; 
                               left: 0; 
@@ -281,14 +289,15 @@ export default function ParentsScreen() {
                         </head>
                         <body>
                           <div class="video-container">
-                            <iframe 
-                              src="https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=0&rel=0&modestbranding=1&controls=1&showinfo=0&fs=1&cc_load_policy=0&iv_load_policy=3&autohide=0&origin=https://localhost&enablejsapi=1" 
-                              title="YouTube video player" 
-                              frameborder="0" 
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                              referrerpolicy="strict-origin-when-cross-origin" 
-                              allowfullscreen>
-                            </iframe>
+                            <div class="video-wrapper">
+                              <iframe 
+                                src="https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1"
+                                title="YouTube video player" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                              </iframe>
+                            </div>
                           </div>
                         </body>
                         </html>
@@ -301,11 +310,13 @@ export default function ParentsScreen() {
                     javaScriptEnabled={true}
                     domStorageEnabled={true}
                     startInLoadingState={true}
+                    scalesPageToFit={true}
                     mixedContentMode="compatibility"
                     originWhitelist={['*']}
                     allowsBackForwardNavigationGestures={false}
                     bounces={false}
                     scrollEnabled={false}
+                    onShouldStartLoadWithRequest={() => true}
                     onError={(syntheticEvent) => {
                       const { nativeEvent } = syntheticEvent;
                       console.warn('WebView error: ', nativeEvent);

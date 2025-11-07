@@ -22,7 +22,11 @@ export default function SignRecognitionScreen() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [model, setModel] = useState<any>(null);
   const [isModelLoading, setIsModelLoading] = useState(false);
+  const [modelStatus, setModelStatus] = useState<'loading' | 'real' | 'mock'>('loading');
+  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [modelIssueDetected, setModelIssueDetected] = useState(false);
   const cameraRef = useRef<CameraView>(null);
+  const consecutiveHCount = useRef(0);
 
   // Load TensorFlow model
   useEffect(() => {
@@ -32,63 +36,113 @@ export default function SignRecognitionScreen() {
   const loadModel = async () => {
     try {
       setIsModelLoading(true);
+      setDebugInfo('Starting TensorFlow initialization...');
       
-      // Initialize TensorFlow.js
       await tf.ready();
-      console.log('TensorFlow.js is ready!');
-      
-      // Load your actual model from bundled assets using require
-      console.log('Loading model from bundled assets...');
+      setDebugInfo('TensorFlow ready. Loading model files...');
+      console.log('✅ TensorFlow.js is ready!');
       
       try {
-        // Use bundleResourceIO for React Native
+        // Simple model loading without complex error handling
         const modelJson = require('../../model/model.json');
-        const modelWeights = require('../../model/group1-shard1of1.bin');
+        setDebugInfo('Model JSON loaded. Checking structure...');
         
-        console.log('Model JSON loaded, creating bundled resource...');
+        // Log model structure
+        console.log('Model config:', {
+          hasTopology: !!modelJson.modelTopology,
+          hasWeightsManifest: !!modelJson.weightsManifest,
+          manifestLength: modelJson.weightsManifest?.length,
+          weightsPath: modelJson.weightsManifest?.[0]?.paths
+        });
         
-        // Create a custom IO handler for bundled assets
-        const bundledModelIO = {
-          load: async () => {
-            return {
-              modelTopology: modelJson.modelTopology,
-              weightSpecs: modelJson.weightsManifest[0].weights,
-              weightData: modelWeights,
-              format: modelJson.format,
-              generatedBy: modelJson.generatedBy,
-              convertedBy: modelJson.convertedBy
-            };
-          }
+        const { Asset } = require('expo-asset');
+        
+        // Try loading the bin file
+        let binAsset;
+        try {
+          binAsset = Asset.fromModule(require('../../model/group1-shard1of1.bin'));
+        } catch {
+          setDebugInfo('❌ ERROR: Cannot find bin file!');
+          throw new Error('Bin file not found in ../../model/group1-shard1of1.bin');
+        }
+        
+        setDebugInfo('Downloading weight file...');
+        await binAsset.downloadAsync();
+        
+        setDebugInfo('Fetching weight data...');
+        const response = await fetch(binAsset.localUri || binAsset.uri);
+        const weightData = await response.arrayBuffer();
+        
+        console.log('Weight data size:', weightData.byteLength);
+        setDebugInfo(`Weight loaded: ${weightData.byteLength} bytes`);
+        
+        if (weightData.byteLength === 0) {
+          throw new Error('Weight file is empty');
+        }
+        
+        setDebugInfo('Creating model artifacts...');
+        
+        const modelArtifacts = {
+          modelTopology: modelJson.modelTopology,
+          weightsManifest: modelJson.weightsManifest,
+          format: modelJson.format,
+          generatedBy: modelJson.generatedBy,
+          convertedBy: modelJson.convertedBy,
+          weightData: weightData,
+          weightSpecs: modelJson.weightsManifest[0].weights
         };
         
-        const loadedModel = await tf.loadLayersModel(bundledModelIO);
-        console.log('Model loaded successfully!');
-        setModel(loadedModel);
-      } catch (modelError) {
-        console.warn('Could not load model from assets:', modelError);
-        console.log('Creating mock model for demo purposes...');
+        setDebugInfo('Loading TensorFlow model...');
+        const loadedModel = await tf.loadLayersModel(tf.io.fromMemory(modelArtifacts));
         
-        // Fallback to mock model if real model fails to load
+        console.log('✅✅✅ MODEL LOADED SUCCESSFULLY! ✅✅✅');
+        console.log('Input shape:', loadedModel.inputs[0].shape);
+        console.log('Output shape:', loadedModel.outputs[0].shape);
+        
+        // CRITICAL TEST: Make a real prediction to verify model works
+        const testInput = tf.randomNormal([1, 28, 28, 1]);
+        const testOutput = loadedModel.predict(testInput) as tf.Tensor;
+        const testData = await testOutput.data();
+        
+        console.log('TEST PREDICTION:', Array.from(testData).map((v, i) => 
+          `${ISL_ALPHABET[i]}:${v.toFixed(3)}`
+        ).join(', '));
+        
+        const testMaxIndex = Array.from(testData).indexOf(Math.max(...Array.from(testData)));
+        console.log('Test predicts:', ISL_ALPHABET[testMaxIndex]);
+        
+        testInput.dispose();
+        testOutput.dispose();
+        
+        setModel(loadedModel);
+        setModelStatus('real');
+        setDebugInfo('✅ Real model loaded!');
+        
+      } catch (error: any) {
+        console.error('❌ Model loading failed:', error);
+        setDebugInfo(`❌ Failed: ${error.message}`);
+        
+        // Use mock model
+        console.log('⚠️ USING MOCK MODEL');
         const mockModel = {
-          predict: (input: any) => {
-            // Return mock tensor-like object
-            return {
-              data: async () => {
-                // Create mock prediction data (26 classes for A-Z)
-                const mockData = new Array(26).fill(0);
-                const randomIndex = Math.floor(Math.random() * 26);
-                mockData[randomIndex] = 0.8; // Mock confidence
-                return new Float32Array(mockData);
-              },
-              dispose: () => {}
-            };
-          }
+          isMock: true,
+          predict: () => ({
+            data: async () => {
+              const data = new Float32Array(26);
+              const randomIdx = Math.floor(Math.random() * 26);
+              data[randomIdx] = 0.9;
+              return data;
+            },
+            dispose: () => {}
+          })
         };
         setModel(mockModel);
+        setModelStatus('mock');
       }
     } catch (error) {
-      console.error('Error loading model:', error);
-      Alert.alert('Model Error', 'Failed to load the AI model. Please try again.');
+      console.error('Fatal error:', error);
+      setDebugInfo('❌ Fatal error loading model');
+      setModelStatus('mock');
     } finally {
       setIsModelLoading(false);
     }
@@ -160,12 +214,17 @@ export default function SignRecognitionScreen() {
   };
 
   const captureAndPredict = async () => {
-    if (!cameraRef.current || isCapturing) return;
+    if (!cameraRef.current || isCapturing || !model) return;
 
     try {
       setIsCapturing(true);
       
-      // Take picture
+      console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🎯 PREDICTION ATTEMPT');
+      console.log('Expected:', currentAlphabet);
+      console.log('Model type:', modelStatus);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+      
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.7,
         base64: true,
@@ -173,45 +232,69 @@ export default function SignRecognitionScreen() {
       });
 
       if (photo && photo.base64) {
-        console.log('Photo captured:', photo.uri);
-        
-        // Process the image for the model
         const processedImage = await preprocessImage(photo.uri, photo.base64);
         
-        // Make prediction using your trained model
         const predictions = model.predict(processedImage) as tf.Tensor;
         const predictionData = await predictions.data();
         
-        // Get the predicted class (highest probability)
-        const predictedIndex = Array.from(predictionData).indexOf(Math.max(...Array.from(predictionData)));
-        const predictedLetter = ISL_ALPHABET[predictedIndex];
-        const confidence = predictionData[predictedIndex];
+        console.log('\n📊 PREDICTION RESULTS:');
+        console.log('─────────────────────────────────');
         
-        console.log('Prediction:', predictedLetter, 'Confidence:', confidence);
+        const sortedPreds = Array.from(predictionData)
+          .map((prob, idx) => ({ letter: ISL_ALPHABET[idx], prob, idx }))
+          .sort((a, b) => b.prob - a.prob);
+        
+        sortedPreds.slice(0, 5).forEach((p, i) => {
+          const bar = '█'.repeat(Math.floor(p.prob * 20));
+          console.log(`${i + 1}. ${p.letter}: ${(p.prob * 100).toFixed(1)}% ${bar}`);
+        });
+        
+        const maxProb = Math.max(...Array.from(predictionData));
+        const predictedIndex = Array.from(predictionData).indexOf(maxProb);
+        const predictedLetter = ISL_ALPHABET[predictedIndex];
+        
+        // Detect if model is stuck on 'H'
+        if (predictedLetter === 'H') {
+          consecutiveHCount.current += 1;
+          if (consecutiveHCount.current >= 3 && !modelIssueDetected) {
+            setModelIssueDetected(true);
+            Alert.alert(
+              '⚠️ Model Training Issue Detected',
+              'The AI model appears to be biased towards predicting "H". This is a model training issue, not a problem with your signs.\n\nThe model needs to be retrained with a balanced dataset.',
+              [{ text: 'OK' }]
+            );
+          }
+        } else {
+          consecutiveHCount.current = 0;
+        }
+        
+        console.log('─────────────────────────────────');
+        console.log('🎯 FINAL:', predictedLetter, `(${(maxProb * 100).toFixed(2)}%)`);
+        console.log('✓ Expected:', currentAlphabet);
+        console.log('Match:', predictedLetter === currentAlphabet ? '✅' : '❌');
+        
+        // Show if model is overconfident on wrong answer (potential overfitting)
+        if (maxProb > 0.7 && predictedLetter !== currentAlphabet) {
+          console.warn('⚠️ High confidence on wrong prediction - possible model overfitting');
+        }
+        
+        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
         
         setPrediction(predictedLetter);
-        
-        // Check if prediction is correct (with confidence threshold)
-        const correct = predictedLetter === currentAlphabet && confidence > 0.5;
+        const correct = predictedLetter === currentAlphabet;
         setIsCorrect(correct);
         
-        if (correct) {
-          setScore(score + 1);
-        }
+        if (correct) setScore(score + 1);
         setAttempts(attempts + 1);
         
-        // Clean up tensors to prevent memory leaks
         predictions.dispose();
         processedImage.dispose();
         
-        // Show result for 2 seconds then generate new alphabet
-        setTimeout(() => {
-          generateRandomAlphabet();
-        }, 2000);
+        setTimeout(() => generateRandomAlphabet(), 2000);
       }
     } catch (error) {
-      console.error('Error during prediction:', error);
-      Alert.alert('Prediction Error', 'Failed to analyze the sign. Please try again.');
+      console.error('❌ Prediction error:', error);
+      Alert.alert('Error', 'Failed to analyze sign');
     } finally {
       setIsCapturing(false);
     }
@@ -305,7 +388,9 @@ export default function SignRecognitionScreen() {
             resizeMode="cover"
           />
           <View style={styles.feedbackBadge}>
-            <Text style={styles.feedbackText}>AI Powered!</Text>
+            <Text style={styles.feedbackText}>
+              {modelStatus === 'real' ? '✅ AI Ready!' : modelStatus === 'mock' ? '⚠️ Demo Mode' : '⏳ Loading...'}
+            </Text>
           </View>
         </View>
 
@@ -314,10 +399,38 @@ export default function SignRecognitionScreen() {
           Use your camera to show ISL alphabet signs and let AI recognize them!
         </Text>
 
+        {/* Debug Info Display */}
+        {debugInfo && (
+          <View style={styles.debugContainer}>
+            <Text style={styles.debugText}>{debugInfo}</Text>
+          </View>
+        )}
+
+        {modelStatus === 'mock' && (
+          <View style={styles.warningContainer}>
+            <Text style={styles.warningText}>
+              ⚠️ MOCK MODEL ACTIVE - Predictions are random!{'\n'}
+              Check console for loading errors.
+            </Text>
+          </View>
+        )}
+
         {isModelLoading && (
           <View style={styles.loadingContainer}>
             <RefreshCw size={20} color="#84a627" strokeWidth={2} />
             <Text style={styles.loadingText}>Loading AI Model...</Text>
+          </View>
+        )}
+
+        {modelIssueDetected && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorTitle}>⚠️ Model Training Issue</Text>
+            <Text style={styles.errorText}>
+              The AI model is biased towards 'H'. This requires retraining the model with:
+              {'\n\n'}• Balanced dataset (equal samples for all letters)
+              {'\n'}• Better data augmentation
+              {'\n'}• Proper validation during training
+            </Text>
           </View>
         )}
 
@@ -542,5 +655,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'white',
+  },
+  debugContainer: {
+    backgroundColor: '#E3F2FD',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#2196F3',
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#1565C0',
+    fontFamily: 'monospace',
+  },
+  warningContainer: {
+    backgroundColor: '#FFF3CD',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFC107',
+  },
+  warningText: {
+    color: '#856404',
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  errorContainer: {
+    backgroundColor: '#FEE2E2',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderLeftWidth: 4,
+    borderLeftColor: '#DC2626',
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#991B1B',
+    marginBottom: 8,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#7F1D1D',
+    lineHeight: 20,
   },
 });

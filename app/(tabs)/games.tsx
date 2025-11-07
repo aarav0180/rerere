@@ -1,20 +1,23 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Sparkles, Target, Palette, Hand, Puzzle, Grid3x3 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 interface GameCard {
   id: string;
   title: string;
   icon: string;
   color: string;
+  route?: string;
 }
 
 const games: GameCard[] = [
-  { id: '1', title: 'Alphabet\nMatch', icon: 'sparkles', color: '#fef9c3' },
-  { id: '2', title: 'Number\nChallenge', icon: 'target', color: '#fecaca' },
-  { id: '3', title: 'Sign Story Fun', icon: 'palette', color: '#fef9c3' },
-  { id: '4', title: 'Daily Word\nSigns', icon: 'hand', color: '#fecaca' },
-  { id: '5', title: 'Puzzle Signs', icon: 'puzzle', color: '#fef9c3' },
-  { id: '6', title: 'Memory Match', icon: 'grid', color: '#fecaca' },
+  { id: '1', title: 'Alphabet\nMatch', icon: 'sparkles', color: '#fef9c3', route: '/games/alphabet-match' },
+  { id: '2', title: 'Number\nChallenge', icon: 'target', color: '#fecaca', route: '/games/number-challenge' },
+  { id: '3', title: 'Sign Story Fun', icon: 'palette', color: '#fef9c3', route: '/games/sign-story' },
+  { id: '4', title: 'Daily Word\nSigns', icon: 'hand', color: '#fecaca', route: '/games/daily-words' },
+  { id: '5', title: 'Puzzle Signs', icon: 'puzzle', color: '#fef9c3', route: '/games/puzzle-signs' },
+  { id: '6', title: 'Memory Match', icon: 'grid', color: '#fecaca', route: '/games/memory-match' },
+  { id: 'sign-ninja', title: 'Sign Ninja', icon: '🥷', color: '#d4a574', route: '/games/sign-ninja' },
 ];
 
 const IconComponent = ({ iconName, color }: { iconName: string; color: string }) => {
@@ -39,6 +42,17 @@ const IconComponent = ({ iconName, color }: { iconName: string; color: string })
 };
 
 export default function GamesScreen() {
+  const router = useRouter();
+
+  const handleGamePress = (gameRoute?: string) => {
+    if (gameRoute) {
+      router.push(gameRoute as any);
+    } else {
+      // Game not yet implemented
+      alert('Coming soon!');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Educational Games</Text>
@@ -74,9 +88,14 @@ export default function GamesScreen() {
                   { backgroundColor: game.color },
                 ]}
                 activeOpacity={0.8}
+                onPress={() => handleGamePress(game.route)}
               >
                 <View style={styles.iconContainer}>
-                  <IconComponent iconName={game.icon} color="#000" />
+                  {game.icon === '🥷' ? (
+                    <Text style={{ fontSize: 48 }}>{game.icon}</Text>
+                  ) : (
+                    <IconComponent iconName={game.icon} color="#000" />
+                  )}
                 </View>
                 <Text style={styles.gameTitle}>{game.title}</Text>
               </TouchableOpacity>
