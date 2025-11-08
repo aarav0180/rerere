@@ -11,19 +11,43 @@ interface HandDetectorProps {
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
-const getISLSignImage = (letter: string) => {
-  // Temporary: Using colorful letter placeholders
-  const colors = ['4CAF50', 'FF9800', '2196F3', 'E91E63', '9C27B0', 'FF5722'];
-  const colorIndex = letter.charCodeAt(0) % colors.length;
-  
-  return `https://via.placeholder.com/100x100/${colors[colorIndex]}/FFFFFF?text=ISL%20${letter}`;
+// Safe image loader - returns null if image doesn't exist
+const loadImage = (letter: string) => {
+  try {
+    // Try to load from assets/images with .jpeg extension
+    switch (letter) {
+      case 'A': return require('../../../assets/images/A.jpeg');
+      case 'B': return require('../../../assets/images/B.jpeg');
+      case 'C': return require('../../../assets/images/C.jpeg');
+      case 'D': return require('../../../assets/images/D.jpeg');
+      case 'E': return require('../../../assets/images/E.jpeg');
+      case 'F': return require('../../../assets/images/F.jpeg');
+      case 'G': return require('../../../assets/images/G.jpeg');
+      case 'H': return require('../../../assets/images/H.jpeg');
+      case 'I': return require('../../../assets/images/I.jpeg');
+      case 'J': return require('../../../assets/images/J.jpeg');
+      case 'K': return require('../../../assets/images/K.jpeg');
+      case 'L': return require('../../../assets/images/L.jpeg');
+      case 'M': return require('../../../assets/images/M.jpeg');
+      case 'N': return require('../../../assets/images/N.jpeg');
+      case 'O': return require('../../../assets/images/O.jpeg');
+      case 'P': return require('../../../assets/images/P.jpeg');
+      case 'Q': return require('../../../assets/images/Q.jpeg');
+      case 'R': return require('../../../assets/images/R.jpeg');
+      case 'S': return require('../../../assets/images/S.jpeg');
+      case 'T': return require('../../../assets/images/T.jpeg');
+      case 'U': return require('../../../assets/images/U.jpeg');
+      case 'V': return require('../../../assets/images/V.jpeg');
+      case 'W': return require('../../../assets/images/W.jpeg');
+      case 'X': return require('../../../assets/images/X.jpeg');
+      case 'Y': return require('../../../assets/images/Y.jpeg');
+      case 'Z': return require('../../../assets/images/Z.jpeg');
+      default: return null;
+    }
+  } catch (error) {
+    return null;
+  }
 };
-
-// Note: TensorFlow.js logs in console are from gesture detection initialization
-// They are harmless and can be ignored. The game uses button taps for now.
-// When you implement actual hand gesture recognition, you'll need to add TensorFlow model files.
-//hbjbjhbjhbhj
-
 
 export default function HandDetector({ onSignDetected, isPaused }: HandDetectorProps) {
   const [facing, setFacing] = useState<'front' | 'back'>('front');
@@ -45,6 +69,8 @@ export default function HandDetector({ onSignDetected, isPaused }: HandDetectorP
           
           <View style={styles.signsGrid}>
             {ALPHABET.map(letter => {
+              const imageSource = loadImage(letter);
+              
               return (
                 <TouchableOpacity
                   key={letter}
@@ -53,19 +79,21 @@ export default function HandDetector({ onSignDetected, isPaused }: HandDetectorP
                   disabled={isPaused}
                   activeOpacity={0.7}
                 >
-                  <Image 
-                    source={{ uri: getISLSignImage(letter) }}
-                    style={styles.signImage}
-                    resizeMode="cover"
-                  />
+                  {imageSource ? (
+                    <Image 
+                      source={imageSource}
+                      style={styles.signImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.placeholderImage}>
+                      <Text style={styles.placeholderText}>{letter}</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
           </View>
-          
-          <Text style={styles.footerNote}>
-            💡 Add your ISL images to make it authentic
-          </Text>
         </View>
       </View>
     </View>
@@ -133,10 +161,17 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 6,
   },
-  footerNote: {
-    color: 'rgba(255, 255, 255, 0.7)',
-    fontSize: 10,
-    textAlign: 'center',
-    marginTop: 6,
+  placeholderImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#f0f9f0',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#84a627',
   },
 });
