@@ -21,7 +21,7 @@ const tutorials: VideoTutorial[] = [
     id: '5',
     title: 'Importance of ISL in Educating Deaf Children',
     duration: '8 min',
-    thumbnail: 'https://img.youtube.com/vi/9B1nE62sBes/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/9B1nE62sBes/hqdefault.jpg',
     category: 'Motivation',
     youtubeId: '9B1nE62sBes',
     description: 'Understanding why early sign language access is crucial for deaf children\'s development and communication.'
@@ -32,7 +32,7 @@ const tutorials: VideoTutorial[] = [
     id: '1',
     title: 'Indian Sign Language 101 - Alphabet',
     duration: '15 min',
-    thumbnail: 'https://img.youtube.com/vi/qcdivQfA41Y/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/qcdivQfA41Y/hqdefault.jpg',
     category: 'Alphabet',
     youtubeId: 'qcdivQfA41Y',
     description: 'Learn the complete ISL alphabet - the foundation for fingerspelling and sign recognition.'
@@ -41,7 +41,7 @@ const tutorials: VideoTutorial[] = [
     id: '2',
     title: 'Basic Words in ISL - Everyday Vocabulary',
     duration: '12 min',
-    thumbnail: 'https://img.youtube.com/vi/VtbYvVDItvg/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/VtbYvVDItvg/hqdefault.jpg',
     category: 'Basic Words',
     youtubeId: 'VtbYvVDItvg',
     description: 'Essential everyday vocabulary to start communicating with your deaf child in ISL.'
@@ -52,7 +52,7 @@ const tutorials: VideoTutorial[] = [
     id: '3',
     title: 'Basic Phrases in ISL - Common Sentences',
     duration: '18 min',
-    thumbnail: 'https://img.youtube.com/vi/gtEjG8cLMro/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/gtEjG8cLMro/hqdefault.jpg',
     category: 'Phrases',
     youtubeId: 'gtEjG8cLMro',
     description: 'Learn simple conversational sentences like introductions and common greetings in ISL.'
@@ -61,57 +61,57 @@ const tutorials: VideoTutorial[] = [
     id: '4',
     title: 'Action Words & Verbs in ISL',
     duration: '14 min',
-    thumbnail: 'https://img.youtube.com/vi/HFUcDBSKtqo/maxresdefault.jpg',
+    thumbnail: 'https://img.youtube.com/vi/HFUcDBSKtqo/hqdefault.jpg',
     category: 'Action Words',
     youtubeId: 'HFUcDBSKtqo',
     description: 'Master action signs for daily routines - run, eat, see, play, and more essential verbs.'
   },
   
-  // Additional ISL Resources
+  // Additional ISL Resources - UPDATED WITH CORRECT LINKS
   {
     id: '6',
-    title: 'ISL Numbers and Counting',
-    duration: '10 min',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', // Placeholder - replace with actual ISL numbers video
+    title: 'ISL Numbers 1-10',
+    duration: '5 min',
+    thumbnail: 'https://img.youtube.com/vi/SCqw4o0KA-k/hqdefault.jpg',
     category: 'Numbers',
-    youtubeId: 'dQw4w9WgXcQ', // Placeholder - replace with actual video ID
-    description: 'Learn to sign numbers 1-100 and basic mathematical concepts in Indian Sign Language.'
+    youtubeId: 'SCqw4o0KA-k',
+    description: 'Learn to sign numbers 1-10 in Indian Sign Language with clear demonstrations and practice.'
   },
   {
     id: '7',
-    title: 'Family Members in ISL',
-    duration: '8 min',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', // Placeholder
+    title: 'Family Signs in ISL',
+    duration: '6 min',
+    thumbnail: 'https://img.youtube.com/vi/drs0_jcKr5w/hqdefault.jpg',
     category: 'Family',
-    youtubeId: 'dQw4w9WgXcQ', // Placeholder
-    description: 'Signs for family relationships - mother, father, brother, sister, grandparents, and more.'
+    youtubeId: 'drs0_jcKr5w',
+    description: 'Learn signs for family members - mother, father, brother, sister, and extended family in ISL.'
   },
   {
     id: '8',
     title: 'Colors in Indian Sign Language',
-    duration: '6 min',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', // Placeholder
+    duration: '8 min',
+    thumbnail: 'https://img.youtube.com/vi/qtrBGmioR2Q/hqdefault.jpg',
     category: 'Colors',
-    youtubeId: 'dQw4w9WgXcQ', // Placeholder
-    description: 'Learn to sign all basic colors and use them in everyday conversations with your child.'
+    youtubeId: 'qtrBGmioR2Q',
+    description: 'Master all basic color signs in ISL and use them in everyday conversations with your child.'
   },
   {
     id: '9',
-    title: 'Emotions and Feelings in ISL',
-    duration: '12 min',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', // Placeholder
-    category: 'Emotions',
-    youtubeId: 'dQw4w9WgXcQ', // Placeholder
-    description: 'Express and recognize emotions - happy, sad, angry, excited, tired, and other feelings.'
+    title: 'ISL Fruits and Vegetables',
+    duration: '10 min',
+    thumbnail: 'https://img.youtube.com/vi/V_rAZMQlhtc/hqdefault.jpg',
+    category: 'Food',
+    youtubeId: 'V_rAZMQlhtc',
+    description: 'Learn signs for common fruits and vegetables to discuss meals and healthy eating with your child.'
   },
   {
     id: '10',
-    title: 'Daily Routine Signs in ISL',
-    duration: '16 min',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg', // Placeholder
-    category: 'Daily Life',
-    youtubeId: 'dQw4w9WgXcQ', // Placeholder
-    description: 'Signs for daily activities - wake up, brush teeth, eat breakfast, go to school, and bedtime routines.'
+    title: 'Greetings and Polite Expressions in ISL',
+    duration: '1 min',
+    thumbnail: 'https://img.youtube.com/vi/TMmOpBFUeLk/hqdefault.jpg',
+    category: 'Greetings',
+    youtubeId: 'TMmOpBFUeLk',
+    description: 'Essential greetings, thank you, sorry, and polite expressions for daily interactions in ISL.'
   }
 ];
 
