@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, Dim
 import { Play, Clock, X, ExternalLink } from 'lucide-react-native';
 import { WebView } from 'react-native-webview';
 import { useState } from 'react';
+import { useProgress } from '../../contexts/ProgressContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -119,8 +120,12 @@ export default function ParentsScreen() {
   const [selectedVideo, setSelectedVideo] = useState<VideoTutorial | null>(null);
   const [videoModalVisible, setVideoModalVisible] = useState(false);
   const [useDirectLink, setUseDirectLink] = useState(false);
+  const { updateVideoWatched } = useProgress();
 
   const handleVideoPress = (tutorial: VideoTutorial) => {
+    // Track video view
+    updateVideoWatched();
+    
     // For better reliability, ask user's preference
     Alert.alert(
       'Watch Video',

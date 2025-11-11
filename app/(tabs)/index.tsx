@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useState, useEffect, useRef } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import '@tensorflow/tfjs-react-native';
+import { useProgress } from '../../contexts/ProgressContext';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ export default function SignRecognitionScreen() {
   const [modelIssueDetected, setModelIssueDetected] = useState(false);
   const cameraRef = useRef<CameraView>(null);
   const consecutiveHCount = useRef(0);
+  const { updateAIRecognition } = useProgress();
 
   // Load TensorFlow model
   useEffect(() => {
@@ -281,8 +283,11 @@ export default function SignRecognitionScreen() {
         console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
         
         setPrediction(predictedLetter);
-        const correct = predictedLetter === currentAlphabet;
+        const correct = predictedLetter === currentAlphabet && maxProb > 0.3;
         setIsCorrect(correct);
+        
+        // Update progress
+        updateAIRecognition(correct);
         
         if (correct) setScore(score + 1);
         setAttempts(attempts + 1);

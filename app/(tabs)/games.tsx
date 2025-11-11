@@ -13,11 +13,10 @@ interface GameCard {
 const games: GameCard[] = [
   { id: '1', title: 'Alphabet\nMatch', icon: 'sparkles', color: '#fef9c3', route: '/games/alphabet-match' },
   { id: '2', title: 'Number\nChallenge', icon: 'target', color: '#fecaca', route: '/games/number-challenge' },
-  { id: '3', title: 'Sign Story Fun', icon: 'palette', color: '#fef9c3', route: '/games/sign-story' },
-  { id: '4', title: 'Daily Word\nSigns', icon: 'hand', color: '#fecaca', route: '/games/daily-words' },
-  { id: '5', title: 'Puzzle Signs', icon: 'puzzle', color: '#fef9c3', route: '/games/puzzle-signs' },
-  { id: '6', title: 'Memory Match', icon: 'grid', color: '#fecaca', route: '/games/memory-match' },
-  { id: 'sign-ninja', title: 'Sign Ninja', icon: '🥷', color: '#d4a574', route: '/games/sign-ninja' },
+  { id: '3', title: 'Sign Ninja', icon: '🥷', color: '#d4a574', route: '/games/sign-ninja' },
+  { id: '4', title: 'Memory\nMatch', icon: 'grid', color: '#fecaca', route: '/games/memory-match' },
+  { id: '5', title: 'Word\nBuilder', icon: 'puzzle', color: '#fef9c3', route: '/games/word-builder' },
+  { id: '6', title: 'Speed\nSigns', icon: 'hand', color: '#d4e7ff', route: '/games/speed-signs' },
 ];
 
 const IconComponent = ({ iconName, color }: { iconName: string; color: string }) => {

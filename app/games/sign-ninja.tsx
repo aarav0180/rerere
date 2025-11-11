@@ -4,6 +4,7 @@ import { ArrowLeft, Play, Pause, RotateCcw } from 'lucide-react-native';
 import { useState, useEffect } from 'react';
 import { Camera } from 'expo-camera';
 import SignNinjaGame from '../../components/games/SignNinja/SignNinjaGame';
+import { useProgress } from '../../contexts/ProgressContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -18,6 +19,7 @@ export default function SignNinjaScreen() {
   const [isPaused, setIsPaused] = useState(false);
   const [score, setScore] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
+  const { updateGamePlayed } = useProgress();
 
   useEffect(() => {
     (async () => {
@@ -73,6 +75,9 @@ export default function SignNinjaScreen() {
   };
 
   const handleGameOver = (finalScore: number) => {
+    // Update progress when game ends
+    updateGamePlayed('sign-ninja', finalScore);
+    
     Alert.alert(
       'Game Over!',
       `Your final score: ${finalScore}`,

@@ -1,154 +1,213 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Flame, Star, Trophy, Award, Zap, Crown } from 'lucide-react-native';
-
-interface Badge {
-  id: string;
-  icon: string;
-  name: string;
-  color: string;
-  earned: boolean;
-}
-
-const badges: Badge[] = [
-  { id: '1', icon: 'star', name: 'First Sign', color: '#fbbf24', earned: true },
-  { id: '2', icon: 'trophy', name: '7 Day Streak', color: '#84a627', earned: true },
-  { id: '3', icon: 'award', name: '50 Stars', color: '#8b5cf6', earned: true },
-  { id: '4', icon: 'zap', name: 'Speed Master', color: '#f59e0b', earned: false },
-  { id: '5', icon: 'crown', name: 'Champion', color: '#ef4444', earned: false },
-  { id: '6', icon: 'star', name: '100 Signs', color: '#3b82f6', earned: false },
-];
-
-const BadgeIcon = ({ iconName, color, size = 32 }: { iconName: string; color: string; size?: number }) => {
-  const iconProps = { size, color, strokeWidth: 2 };
-
-  switch (iconName) {
-    case 'star':
-      return <Star {...iconProps} fill={color} />;
-    case 'trophy':
-      return <Trophy {...iconProps} />;
-    case 'award':
-      return <Award {...iconProps} />;
-    case 'zap':
-      return <Zap {...iconProps} />;
-    case 'crown':
-      return <Crown {...iconProps} />;
-    default:
-      return <Star {...iconProps} />;
-  }
-};
+import { Trophy, Target, Flame, Star, Award, TrendingUp, Calendar, Zap } from 'lucide-react-native';
+import { useProgress } from '../../contexts/ProgressContext';
 
 export default function ProgressScreen() {
+  const { progress, resetProgress } = useProgress();
+
+  const getNextLevelXP = () => {
+    return progress.level * 100;
+  };
+
+  const getCurrentLevelXP = () => {
+    return progress.xp % 100;
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Progress Tracker</Text>
+      <Text style={styles.title}>Your Progress</Text>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <View style={styles.iconCircle}>
-                <Flame size={32} color="#f97316" strokeWidth={2} />
+          {/* Level and XP Card */}
+          <View style={styles.levelCard}>
+            <View style={styles.levelHeader}>
+              <View style={styles.levelBadge}>
+                <Star size={32} color="#FFD700" fill="#FFD700" />
+                <Text style={styles.levelNumber}>Level {progress.level}</Text>
               </View>
-              <Text style={styles.statValue}>12</Text>
-              <Text style={styles.statLabel}>Day Streak</Text>
+              <Text style={styles.xpText}>{getCurrentLevelXP()} / {getNextLevelXP()} XP</Text>
             </View>
-
-            <View style={styles.statCard}>
-              <View style={[styles.iconCircle, { backgroundColor: '#fef3c7' }]}>
-                <Star size={32} color="#fbbf24" strokeWidth={2} fill="#fbbf24" />
-              </View>
-              <Text style={styles.statValue}>247</Text>
-              <Text style={styles.statLabel}>Total Stars</Text>
+            <View style={styles.xpBar}>
+              <View style={[styles.xpBarFill, { width: `${(getCurrentLevelXP() / getNextLevelXP()) * 100}%` }]} />
             </View>
           </View>
 
-          <View style={styles.weekStreakContainer}>
-            <Text style={styles.sectionTitle}>This Week</Text>
-            <View style={styles.weekDays}>
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
-                <View key={index} style={styles.dayContainer}>
-                  <View style={[
-                    styles.dayCircle,
-                    index < 5 && styles.dayCircleActive
-                  ]}>
-                    {index < 5 && (
-                      <Star size={16} color="white" strokeWidth={2} fill="white" />
-                    )}
-                  </View>
-                  <Text style={styles.dayLabel}>{day}</Text>
+          {/* Overall Progress */}
+          <View style={styles.progressCard}>
+            <Text style={styles.cardTitle}>Overall Progress</Text>
+            <View style={styles.circularProgress}>
+              <Text style={styles.progressPercentage}>{progress.totalProgress}%</Text>
+              <Text style={styles.progressLabel}>Complete</Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressBarFill, { width: `${progress.totalProgress}%` }]} />
+            </View>
+          </View>
+
+          {/* Streak Card */}
+          <View style={styles.streakCard}>
+            <Flame size={40} color="#FF6B35" fill="#FF6B35" />
+            <View style={styles.streakInfo}>
+              <Text style={styles.streakNumber}>{progress.currentStreak}</Text>
+              <Text style={styles.streakLabel}>Day Streak</Text>
+            </View>
+            <View style={styles.streakDivider} />
+            <View style={styles.streakInfo}>
+              <Text style={styles.streakNumber}>{progress.longestStreak}</Text>
+              <Text style={styles.streakLabel}>Best Streak</Text>
+            </View>
+          </View>
+
+          {/* Activity Stats */}
+          <View style={styles.statsSection}>
+            <Text style={styles.sectionTitle}>Activity Stats</Text>
+            
+            <View style={styles.statsGrid}>
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: '#E3F2FD' }]}>
+                  <Trophy size={24} color="#2196F3" />
                 </View>
-              ))}
+                <Text style={styles.statNumber}>{progress.gamesPlayed}</Text>
+                <Text style={styles.statLabel}>Games Played</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: '#F3E5F5' }]}>
+                  <Target size={24} color="#9C27B0" />
+                </View>
+                <Text style={styles.statNumber}>{progress.videosWatched}</Text>
+                <Text style={styles.statLabel}>Videos Watched</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: '#E8F5E9' }]}>
+                  <Zap size={24} color="#4CAF50" />
+                </View>
+                <Text style={styles.statNumber}>{progress.practiceAttempts}</Text>
+                <Text style={styles.statLabel}>Practice Sessions</Text>
+              </View>
+
+              <View style={styles.statCard}>
+                <View style={[styles.statIcon, { backgroundColor: '#FFF3E0' }]}>
+                  <TrendingUp size={24} color="#FF9800" />
+                </View>
+                <Text style={styles.statNumber}>{progress.aiRecognitionAttempts}</Text>
+                <Text style={styles.statLabel}>AI Recognition</Text>
+              </View>
             </View>
           </View>
 
-          <View style={styles.badgesSection}>
-            <Text style={styles.sectionTitle}>Achievements</Text>
-            <View style={styles.badgesGrid}>
-              {badges.map((badge) => (
-                <TouchableOpacity
-                  key={badge.id}
-                  style={[
-                    styles.badgeCard,
-                    !badge.earned && styles.badgeCardLocked
-                  ]}
-                  activeOpacity={0.8}
-                >
-                  <View style={[
-                    styles.badgeIconContainer,
-                    { backgroundColor: badge.earned ? `${badge.color}20` : '#f3f4f6' }
-                  ]}>
-                    <BadgeIcon
-                      iconName={badge.icon}
-                      color={badge.earned ? badge.color : '#9ca3af'}
-                      size={32}
-                    />
-                  </View>
-                  <Text style={[
-                    styles.badgeName,
-                    !badge.earned && styles.badgeNameLocked
-                  ]}>
-                    {badge.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          {/* Game Stats */}
+          <View style={styles.gameStatsSection}>
+            <Text style={styles.sectionTitle}>Game Performance</Text>
+            
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>🥷 Sign Ninja</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.signNinjaHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.signNinjaPlays}</Text>
+              </View>
+            </View>
+
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>✨ Alphabet Match</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.alphabetMatchHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.alphabetMatchPlays}</Text>
+              </View>
+            </View>
+
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>🎯 Number Challenge</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.numberChallengeHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.numberChallengePlays}</Text>
+              </View>
+            </View>
+
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>🎴 Memory Match</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.memoryMatchHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.memoryMatchPlays}</Text>
+              </View>
+            </View>
+
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>🧩 Word Builder</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.wordBuilderHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.wordBuilderPlays}</Text>
+              </View>
+            </View>
+
+            <View style={styles.gameStatCard}>
+              <Text style={styles.gameStatTitle}>⚡ Speed Signs</Text>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>High Score:</Text>
+                <Text style={styles.gameStatValue}>{progress.speedSignsHighScore}</Text>
+              </View>
+              <View style={styles.gameStatRow}>
+                <Text style={styles.gameStatLabel}>Times Played:</Text>
+                <Text style={styles.gameStatValue}>{progress.speedSignsPlays}</Text>
+              </View>
             </View>
           </View>
 
-          <View style={styles.recentActivity}>
-            <Text style={styles.sectionTitle}>Recent Activity</Text>
-            <View style={styles.activityCard}>
-              <View style={styles.activityIcon}>
-                <Trophy size={20} color="#84a627" strokeWidth={2} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Completed Alphabet Match</Text>
-                <Text style={styles.activityTime}>2 hours ago</Text>
-              </View>
-              <Text style={styles.activityStars}>+15 ⭐</Text>
+          {/* Milestones */}
+          <View style={styles.milestonesSection}>
+            <Text style={styles.sectionTitle}>Learning Milestones</Text>
+            
+            <View style={styles.milestoneCard}>
+              <Award size={20} color={progress.alphabetMastered ? '#4CAF50' : '#9E9E9E'} />
+              <Text style={[styles.milestoneText, progress.alphabetMastered && styles.milestoneComplete]}>
+                ISL Alphabet Mastered
+              </Text>
+              {progress.alphabetMastered && <Text style={styles.checkmark}>✓</Text>}
             </View>
 
-            <View style={styles.activityCard}>
-              <View style={styles.activityIcon}>
-                <Star size={20} color="#fbbf24" strokeWidth={2} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Practiced 5 new signs</Text>
-                <Text style={styles.activityTime}>Yesterday</Text>
-              </View>
-              <Text style={styles.activityStars}>+25 ⭐</Text>
+            <View style={styles.milestoneCard}>
+              <Award size={20} color={progress.numbersMastered ? '#4CAF50' : '#9E9E9E'} />
+              <Text style={[styles.milestoneText, progress.numbersMastered && styles.milestoneComplete]}>
+                Numbers 1-10 Mastered
+              </Text>
+              {progress.numbersMastered && <Text style={styles.checkmark}>✓</Text>}
             </View>
 
-            <View style={styles.activityCard}>
-              <View style={styles.activityIcon}>
-                <Flame size={20} color="#f97316" strokeWidth={2} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>7 Day Streak Achieved!</Text>
-                <Text style={styles.activityTime}>3 days ago</Text>
-              </View>
-              <Text style={styles.activityStars}>+50 ⭐</Text>
+            <View style={styles.milestoneCard}>
+              <Award size={20} color={progress.basicWordsMastered ? '#4CAF50' : '#9E9E9E'} />
+              <Text style={[styles.milestoneText, progress.basicWordsMastered && styles.milestoneComplete]}>
+                Basic Words Mastered
+              </Text>
+              {progress.basicWordsMastered && <Text style={styles.checkmark}>✓</Text>}
             </View>
           </View>
+
+          {/* Reset Button (for testing) */}
+          <TouchableOpacity style={styles.resetButton} onPress={resetProgress}>
+            <Text style={styles.resetButtonText}>Reset Progress (Debug)</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </View>
@@ -175,147 +234,223 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
-  statsContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: 32,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-    borderRadius: 20,
+  
+  // Level Card
+  levelCard: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 16,
     padding: 20,
-    alignItems: 'center',
+    marginBottom: 20,
   },
-  iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#fed7aa',
-    justifyContent: 'center',
+  levelHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
-  statValue: {
+  levelBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  levelNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
+  },
+  xpText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  xpBar: {
+    height: 12,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  xpBarFill: {
+    height: '100%',
+    backgroundColor: '#FFD700',
+    borderRadius: 6,
+  },
+  
+  // Progress Card
+  progressCard: {
+    backgroundColor: '#84a627',
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 16,
+  },
+  circularProgress: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  progressPercentage: {
+    fontSize: 48,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  progressLabel: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  progressBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 4,
+  },
+  
+  // Streak Card
+  streakCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3E0',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    gap: 16,
+  },
+  streakInfo: {
+    alignItems: 'center',
+  },
+  streakNumber: {
     fontSize: 32,
+    fontWeight: '700',
+    color: '#FF6B35',
+  },
+  streakLabel: {
+    fontSize: 12,
+    color: '#666',
+  },
+  streakDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#E0E0E0',
+  },
+  
+  // Stats Section
+  statsSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 16,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  statCard: {
+    width: '48%',
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  statIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 24,
     fontWeight: '700',
     color: '#000',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '600',
-  },
-  weekStreakContainer: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 16,
-  },
-  weekDays: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#f9fafb',
-    borderRadius: 16,
-    padding: 16,
-  },
-  dayContainer: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  dayCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#e5e7eb',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dayCircleActive: {
-    backgroundColor: '#84a627',
-  },
-  dayLabel: {
     fontSize: 12,
-    fontWeight: '600',
     color: '#666',
-  },
-  badgesSection: {
-    marginBottom: 32,
-  },
-  badgesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  badgeCard: {
-    width: '31%',
-    aspectRatio: 1,
-    backgroundColor: '#f9fafb',
-    borderRadius: 16,
-    padding: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-  },
-  badgeCardLocked: {
-    opacity: 0.5,
-  },
-  badgeIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeName: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000',
     textAlign: 'center',
   },
-  badgeNameLocked: {
-    color: '#9ca3af',
+  
+  // Game Stats
+  gameStatsSection: {
+    marginBottom: 24,
   },
-  recentActivity: {
-    marginBottom: 20,
+  gameStatCard: {
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    padding: 16,
   },
-  activityCard: {
+  gameStatTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+  gameStatRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  gameStatLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  gameStatValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+  },
+  
+  // Milestones
+  milestonesSection: {
+    marginBottom: 24,
+  },
+  milestoneCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9fafb',
-    padding: 16,
+    backgroundColor: '#F8F9FA',
     borderRadius: 12,
+    padding: 16,
     marginBottom: 12,
     gap: 12,
   },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activityContent: {
+  milestoneText: {
     flex: 1,
-  },
-  activityTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 2,
-  },
-  activityTime: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#666',
   },
-  activityStars: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#84a627',
+  milestoneComplete: {
+    color: '#000',
+    fontWeight: '600',
+  },
+  checkmark: {
+    fontSize: 20,
+    color: '#4CAF50',
+  },
+  
+  // Reset Button
+  resetButton: {
+    backgroundColor: '#FF6B6B',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
